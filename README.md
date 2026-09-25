@@ -91,13 +91,16 @@ legal title — that remains subject to the underlying sales contract and law.
 
 ## Live testnet deployments
 
-_Filled in after deploy:_
+Network: **Sui testnet**. Package and machine are stable; the auction object is
+re-created each `npm run sui:seed` run (auctions have an end time).
 
-| Item | Id |
+| Item | Id / link |
 | --- | --- |
-| Package | `NEXT_PUBLIC_SUI_PACKAGE_ID` |
-| Machine | `NEXT_PUBLIC_MACHINE_ASSET_ID` |
-| Auction | `NEXT_PUBLIC_AUCTION_ID` |
+| Package | [`0x682b7ffd…69d20`](https://suiscan.xyz/testnet/object/0x682b7ffd56d971e53c3df5a261dcbd45afcad8e33d99024c72ac07bbc2169d20) |
+| Publish tx | [`FzVrvreG…WLKYA`](https://suiscan.xyz/testnet/tx/FzVrvreGBDka2xHGpj7eDDegjSQGv1sJLhM2fXfWLKYA) |
+| MachineAsset (MP-JP-0001) | [`0xe089b7fe…621f99`](https://suiscan.xyz/testnet/object/0xe089b7fe82ed21b525c8cc5da3ed4f3cd0eff8afad2499ce2715b48b22621f99) |
+| AdminCap | [`0xff420aa0…7857e`](https://suiscan.xyz/testnet/object/0xff420aa0bfd06a0187de83f741e84083e31ccc3cada7569ac4ef3d6db187857e) |
+| Auction (latest seed) | [`0xf19aa517…2db74`](https://suiscan.xyz/testnet/object/0xf19aa517a6d84c48967e84509e9dafc8669f23d03ee519fd2cc22ceb6cd2db74) |
 
 ## Local setup
 
