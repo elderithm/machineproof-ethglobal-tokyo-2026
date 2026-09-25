@@ -7,10 +7,15 @@ export type SuiNetwork = "testnet" | "devnet" | "mainnet" | "localnet";
 export const SUI_NETWORK: SuiNetwork =
   (process.env.NEXT_PUBLIC_SUI_NETWORK as SuiNetwork) || "testnet";
 
+// NOTE: Mysten's public fullnodes (fullnode.*.sui.io) have removed JSON-RPC
+// (they return -32601 "JSON-RPC ... has been deprecated"). Until this app
+// migrates to gRPC/@mysten/dapp-kit-react, we default to a JSON-RPC-compatible
+// endpoint. Override with NEXT_PUBLIC_SUI_RPC_URL. publicnode serves permissive
+// CORS (access-control-allow-origin: *) so it works from the browser too.
 const DEFAULT_RPC: Record<SuiNetwork, string> = {
-  testnet: "https://fullnode.testnet.sui.io:443",
+  testnet: "https://sui-testnet-rpc.publicnode.com",
   devnet: "https://fullnode.devnet.sui.io:443",
-  mainnet: "https://fullnode.mainnet.sui.io:443",
+  mainnet: "https://sui-rpc.publicnode.com",
   localnet: "http://127.0.0.1:9000",
 };
 

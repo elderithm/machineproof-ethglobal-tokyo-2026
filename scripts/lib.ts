@@ -34,10 +34,20 @@ export function network(): "testnet" | "devnet" | "mainnet" | "localnet" {
   return (process.env.NEXT_PUBLIC_SUI_NETWORK as never) || "testnet";
 }
 
+// Mysten's public fullnodes dropped JSON-RPC; default to a JSON-RPC-compatible
+// endpoint (override with NEXT_PUBLIC_SUI_RPC_URL). getJsonRpcFullnodeUrl is kept
+// as a fallback for localnet.
+const DEFAULT_RPC: Record<string, string> = {
+  testnet: "https://sui-testnet-rpc.publicnode.com",
+  mainnet: "https://sui-rpc.publicnode.com",
+};
+
 export function getClient(): SuiJsonRpcClient {
   const net = network();
   const url =
-    process.env.NEXT_PUBLIC_SUI_RPC_URL || getJsonRpcFullnodeUrl(net);
+    process.env.NEXT_PUBLIC_SUI_RPC_URL ||
+    DEFAULT_RPC[net] ||
+    getJsonRpcFullnodeUrl(net);
   return new SuiJsonRpcClient({ url, network: net });
 }
 
