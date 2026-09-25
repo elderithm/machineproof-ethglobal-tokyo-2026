@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# Sui Move build output
+sui/build/
+
+# Environment / secrets (never commit real credentials or keys)
+.env
+.env*.local
+.env.local
+.env.development.local
+.env.production.local
+*.key
+deployer.keystore
+
+# Sui deployment artifacts (generated)
+deployments/*.json
+!deployments/.gitkeep
+
+# Testing / coverage
+/coverage
+
+# Misc
+.DS_Store
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+*.tsbuildinfo
