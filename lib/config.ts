@@ -28,12 +28,19 @@ export const MACHINE_ASSET_ID = process.env.NEXT_PUBLIC_MACHINE_ASSET_ID || "";
 export const AUCTION_ID = process.env.NEXT_PUBLIC_AUCTION_ID || "";
 export const ADMIN_CAP_ID = process.env.NEXT_PUBLIC_ADMIN_CAP_ID || "";
 
-// World ID
+// World ID 4.0 (relying-party model)
 export const WORLD_APP_ID = (process.env.NEXT_PUBLIC_WORLD_APP_ID || "") as
   | `app_${string}`
   | "";
 export const WORLD_ACTION =
   process.env.NEXT_PUBLIC_WORLD_ACTION || "machineproof-auction-entry";
+// Registered relying-party id (public; e.g. "rp_123..."). Needed by the widget
+// (via rp_context) and the server verify endpoint.
+export const WORLD_RP_ID = process.env.NEXT_PUBLIC_WORLD_RP_ID || "";
+// Staging app + World ID Simulator → "staging". Production Orb → "production".
+export const WORLD_ENVIRONMENT = (process.env.NEXT_PUBLIC_WORLD_ENVIRONMENT ||
+  "staging") as "production" | "staging" | "sandbox";
+export const WORLD_CONFIGURED = Boolean(WORLD_APP_ID && WORLD_RP_ID);
 
 export const IS_CONFIGURED = Boolean(PACKAGE_ID && AUCTION_ID);
 

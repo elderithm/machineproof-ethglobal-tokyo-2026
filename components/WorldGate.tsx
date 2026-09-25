@@ -1,20 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { IDKitWidget, VerificationLevel } from "@worldcoin/idkit";
-import { AUCTION_ID, WORLD_ACTION, WORLD_APP_ID } from "@/lib/config";
+import { IDKitRequestWidget, orbLegacy } from "@worldcoin/idkit";
+import {
+  AUCTION_ID,
+  WORLD_ACTION,
+  WORLD_APP_ID,
+  WORLD_CONFIGURED,
+  WORLD_ENVIRONMENT,
+} from "@/lib/config";
 import { auctionSignal } from "@/lib/world/signal";
 import { Notice, TxLink } from "@/components/ui";
 
-// Shape of the proof payload IDKit hands to onSuccess (World ID v3 / idkit 2.x).
-type WorldProof = {
-  proof: string;
-  merkle_root: string;
-  nullifier_hash: string;
-  verification_level: string;
+type RpContext = {
+  rp_id: string;
+  nonce: string;
+  created_at: number;
+  expires_at: number;
+  signature: string;
 };
 
-type Status = "idle" | "verifying" | "verified" | "error";
+type Status = "idle" | "loading" | "open" | "verifying" | "verified" | "error";
 
 export function WorldGate({
   wallet,
@@ -26,19 +32,43 @@ export function WorldGate({
   onVerified: (digest: string) => void;
 }) {
   const [status, setStatus] = useState<Status>(verified ? "verified" : "idle");
-  const [error, setError] = useState<string>("");
-  const [digest, setDigest] = useState<string>("");
+  const [error, setError] = useState("");
+  const [digest, setDigest] = useState("");
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [open, setOpen] = useState(false);
 
   const signal = auctionSignal(AUCTION_ID, wallet);
 
-  async function handleSuccess(result: WorldProof) {
+  // 1) Fetch a fresh, server-signed rp_context, then open the widget.
+  async function begin() {
+    setError("");
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/world/request");
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setStatus("error");
+        setError(data.error || "Could not start World verification.");
+        return;
+      }
+      setRpContext(data.rpContext);
+      setStatus("open");
+      setOpen(true);
+    } catch (e) {
+      setStatus("error");
+      setError(e instanceof Error ? e.message : "Network error.");
+    }
+  }
+
+  // 2) Widget returned a proof — verify it server-side and register on-chain.
+  async function handleSuccess(result: unknown) {
     setStatus("verifying");
     setError("");
     try {
       const res = await fetch("/api/world/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ proof: result, auctionId: AUCTION_ID, wallet }),
+        body: JSON.stringify({ result, auctionId: AUCTION_ID, wallet }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -78,31 +108,46 @@ export function WorldGate({
         be reused for a different bidder context.
       </p>
 
-      {!WORLD_APP_ID ? (
+      {!WORLD_CONFIGURED ? (
         <Notice tone="warn">
-          NEXT_PUBLIC_WORLD_APP_ID is not set — configure a World app to enable
-          verification.
+          World is not configured — set NEXT_PUBLIC_WORLD_APP_ID and
+          NEXT_PUBLIC_WORLD_RP_ID (after registering the relying party).
         </Notice>
       ) : (
-        <IDKitWidget
-          app_id={WORLD_APP_ID as `app_${string}`}
-          action={WORLD_ACTION}
-          signal={signal}
-          verification_level={VerificationLevel.Orb}
-          onSuccess={handleSuccess}
-        >
-          {({ open }) => (
-            <button
-              className="btn-primary w-full"
-              onClick={open}
-              disabled={status === "verifying"}
-            >
-              {status === "verifying"
+        <>
+          <button
+            className="btn-primary w-full"
+            onClick={begin}
+            disabled={status === "loading" || status === "verifying"}
+          >
+            {status === "loading"
+              ? "Preparing request…"
+              : status === "verifying"
                 ? "Verifying proof…"
                 : "Verify with World ID to join"}
-            </button>
+          </button>
+
+          {rpContext && (
+            <IDKitRequestWidget
+              app_id={WORLD_APP_ID as `app_${string}`}
+              action={WORLD_ACTION}
+              rp_context={rpContext}
+              allow_legacy_proofs={true}
+              preset={orbLegacy({ signal })}
+              environment={WORLD_ENVIRONMENT}
+              open={open}
+              onOpenChange={setOpen}
+              onSuccess={handleSuccess}
+              onError={(e: unknown) => {
+                setStatus("error");
+                setError(
+                  (e as { message?: string })?.message ||
+                    "World verification was cancelled or failed.",
+                );
+              }}
+            />
           )}
-        </IDKitWidget>
+        </>
       )}
 
       {status === "error" && <Notice tone="danger">{error}</Notice>}

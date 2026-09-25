@@ -53,19 +53,32 @@ UI reads live state (getObject / queryEvents) and links to the explorer
 
 See `docs/` for the full spec, and `CLAUDE.md` for scope/priority.
 
-## World ID integration
+## World ID integration (World ID 4.0)
 
-- **Where**: `components/WorldGate.tsx` (widget) and `app/api/world/verify/route.ts`
-  (verification + on-chain registration).
+Built on the current **relying-party (RP) model** with `@worldcoin/idkit` 4.x +
+`@worldcoin/idkit-server`.
+
+- **Where**: `components/WorldGate.tsx` (`IDKitRequestWidget`),
+  `app/api/world/request/route.ts` (signs a short-lived `rp_context` with the RP
+  key), and `app/api/world/verify/route.ts` (v4 verify + on-chain registration).
 - **Why it's load-bearing**: a wallet cannot be registered — and therefore cannot
   bid — without a valid World proof. `auction::place_bid` aborts (`ENotVerified`)
   for any wallet not in the auction's verified registry.
-- **Action / signal**: action `machineproof-auction-entry`; signal
-  `machineproof-auction:{auctionId}:{normalizedWallet}` (`lib/world/signal.ts`),
-  reconstructed server-side so a proof cannot be detached to another wallet/auction.
+- **RP request signing**: the browser first fetches an `rp_context` (`rp_id`,
+  nonce, timestamps, RP signature) from the server, which signs it with the
+  relying party's key via `signRequest`. The signing key never reaches the browser.
+- **Action / signal**: action `machineproof-auction-entry`; the proof carries a
+  `signal` of `machineproof-auction:{auctionId}:{normalizedWallet}`
+  (`lib/world/signal.ts`). The server re-derives `hashSignal(signal)` and compares
+  it to the proof's `signal_hash`, so a proof cannot be detached to another
+  wallet/auction.
+- **Verification**: server POSTs the IDKit result to
+  `https://developer.world.org/api/v4/verify/{rp_id}` (`orbLegacy` preset,
+  `allow_legacy_proofs`), fails closed on any non-success, checks environment,
+  and tracks `nullifier` to reject replays.
 - **Failure paths** (all fail closed): cancelled dialog → auction stays locked;
-  invalid proof → rejected; wrong-wallet / wrong-auction signal → verification
-  fails; replayed nullifier → 409.
+  invalid proof → rejected; wrong-wallet / wrong-auction signal → `signal_hash`
+  mismatch → rejected; replayed nullifier → 409.
 - **What it proves / doesn't**: reduces bot/Sybil auction-entry; it does **not**
   prove corporate authority or creditworthiness.
 
@@ -105,8 +118,10 @@ re-created each `npm run sui:seed` run (auctions have an end time).
 ## Local setup
 
 Prereqns: Node 20+, the [Sui CLI](https://docs.sui.io/references/cli), a Sui wallet
-(e.g. Slush/Sui Wallet) on testnet, and a World app + action from
-[developer.worldcoin.org](https://developer.worldcoin.org).
+(e.g. Slush/Sui Wallet) on testnet, and a World app at
+[developer.world.org](https://developer.world.org) with the **relying party
+registered** (this yields an `rp_id` and an RP signing key) and an action
+`machineproof-auction-entry` created.
 
 ```bash
 npm install
@@ -127,8 +142,11 @@ npm run sui:seed                    # prints MACHINE_ASSET_ID + AUCTION_ID
 npm run dev                         # http://localhost:3000
 ```
 
-The World action's **signal** setting must be enabled so the proof binds to the
-auction+wallet signal.
+World env vars: set `NEXT_PUBLIC_WORLD_APP_ID` (`app_...`),
+`NEXT_PUBLIC_WORLD_RP_ID` (`rp_...`), `WORLD_RP_SIGNING_KEY` (server-only hex),
+and `NEXT_PUBLIC_WORLD_ENVIRONMENT` (`staging`, or `sandbox` when testing with the
+World ID Sandbox app). Verification always posts to the `developer.world.org` v4
+endpoint; the `environment` field distinguishes sandbox/staging/production.
 
 ## Tests
 
