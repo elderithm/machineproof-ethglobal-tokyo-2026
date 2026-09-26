@@ -44,6 +44,22 @@ export const WORLD_CONFIGURED = Boolean(WORLD_APP_ID && WORLD_RP_ID);
 
 export const IS_CONFIGURED = Boolean(PACKAGE_ID && AUCTION_ID);
 
+// --- Optional Curvegrid MultiBaas (EVM provenance mirror) ---
+export const MULTIBAAS_DEPLOYMENT_URL =
+  process.env.NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL || "";
+export const MULTIBAAS_DAPP_KEY =
+  process.env.NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY || "";
+export const MULTIBAAS_REGISTRY_LABEL =
+  process.env.NEXT_PUBLIC_MULTIBAAS_REGISTRY_LABEL || "provenance_registry";
+export const MULTIBAAS_REGISTRY_ALIAS =
+  process.env.NEXT_PUBLIC_MULTIBAAS_REGISTRY_ADDRESS_ALIAS ||
+  "provenance_registry";
+// keccak256("MP-JP-0001") the EVM deploy script anchors; overridable.
+export const EVM_MACHINE_ID = process.env.NEXT_PUBLIC_EVM_MACHINE_ID || "";
+export const MULTIBAAS_CONFIGURED = Boolean(
+  MULTIBAAS_DEPLOYMENT_URL && MULTIBAAS_DAPP_KEY && EVM_MACHINE_ID,
+);
+
 // Move module/function targets.
 export const target = (module: string, fn: string) =>
   `${PACKAGE_ID}::${module}::${fn}` as const;

@@ -1,6 +1,7 @@
 import { WalletBar } from "@/components/WalletBar";
 import { Marketplace } from "@/components/Marketplace";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
+import { EvmProvenance } from "@/components/EvmProvenance";
 import { ConfigBanner } from "@/components/ConfigBanner";
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
         <ConfigBanner />
         <Marketplace />
         <ActivityTimeline />
+        <EvmProvenance />
       </div>
 
       <footer className="mt-10 border-t border-edge pt-6 text-xs text-muted">
