@@ -1,5 +1,6 @@
 import { WalletBar } from "@/components/WalletBar";
 import { Marketplace } from "@/components/Marketplace";
+import { DueDiligence } from "@/components/DueDiligence";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { EvmProvenance } from "@/components/EvmProvenance";
 import { ConfigBanner } from "@/components/ConfigBanner";
@@ -23,6 +24,7 @@ export default function Home() {
       <div className="mt-6 space-y-6">
         <ConfigBanner />
         <Marketplace />
+        <DueDiligence />
         <ActivityTimeline />
         <EvmProvenance />
       </div>
