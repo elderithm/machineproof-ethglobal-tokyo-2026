@@ -39,34 +39,42 @@ async function main() {
 
   const m = SAMPLE_MACHINE;
 
-  // 1) Register the machine passport.
-  const tx1 = new Transaction();
-  tx1.moveCall({
-    target: `${PACKAGE_ID}::machine_asset::register`,
-    arguments: [
-      tx1.pure.string(m.machineId),
-      tx1.pure.string(m.manufacturer),
-      tx1.pure.string(m.model),
-      tx1.pure.vector("u8", bytes(m.serialHash)),
-      tx1.pure.string(m.provenanceUri),
-      tx1.pure.vector("u8", bytes(m.provenanceHash)),
-      tx1.pure.vector("u8", bytes(m.inspectionHash)),
-      tx1.pure.string(m.inspectionStatus),
-      tx1.pure.u64(BigInt(Date.now())),
-    ],
-  });
-  const r1 = await client.signAndExecuteTransaction({
-    signer: keypair,
-    transaction: tx1,
-    options: { showObjectChanges: true },
-  });
-  await client.waitForTransaction({ digest: r1.digest });
-  const machineId = findCreated(
-    r1.objectChanges as never,
-    "::machine_asset::MachineAsset",
-  );
-  if (!machineId) throw new Error("MachineAsset not created. Tx: " + r1.digest);
-  console.log("Machine registered:", machineId);
+  // 1) Register the machine passport — or reuse an existing one (e.g. to mint a
+  //    fresh auction for the same machine after the previous auction ended).
+  const reuseMachineId = process.env.REUSE_MACHINE_ID;
+  let machineId: string;
+  if (reuseMachineId) {
+    machineId = reuseMachineId;
+    console.log("Reusing machine:", machineId);
+  } else {
+    const tx1 = new Transaction();
+    tx1.moveCall({
+      target: `${PACKAGE_ID}::machine_asset::register`,
+      arguments: [
+        tx1.pure.string(m.machineId),
+        tx1.pure.string(m.manufacturer),
+        tx1.pure.string(m.model),
+        tx1.pure.vector("u8", bytes(m.serialHash)),
+        tx1.pure.string(m.provenanceUri),
+        tx1.pure.vector("u8", bytes(m.provenanceHash)),
+        tx1.pure.vector("u8", bytes(m.inspectionHash)),
+        tx1.pure.string(m.inspectionStatus),
+        tx1.pure.u64(BigInt(Date.now())),
+      ],
+    });
+    const r1 = await client.signAndExecuteTransaction({
+      signer: keypair,
+      transaction: tx1,
+      options: { showObjectChanges: true },
+    });
+    await client.waitForTransaction({ digest: r1.digest });
+    machineId = findCreated(
+      r1.objectChanges as never,
+      "::machine_asset::MachineAsset",
+    );
+    if (!machineId) throw new Error("MachineAsset not created. Tx: " + r1.digest);
+    console.log("Machine registered:", machineId);
+  }
 
   // 2) Create the auction for that machine.
   const startMs = Date.now();
