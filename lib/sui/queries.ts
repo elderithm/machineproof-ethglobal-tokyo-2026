@@ -145,6 +145,25 @@ export function parseSettlement(fields: Fields): SettlementView {
   };
 }
 
+export type MachineAssetView = {
+  machineId: string;
+  manufacturer: string;
+  model: string;
+  inspectionStatus: string;
+  seller: string;
+};
+
+/** Parse the on-chain MachineAsset (its String fields decode directly). */
+export function parseMachineAsset(fields: Fields): MachineAssetView {
+  return {
+    machineId: String(fields.machine_id ?? ""),
+    manufacturer: String(fields.manufacturer ?? ""),
+    model: String(fields.model ?? ""),
+    inspectionStatus: String(fields.inspection_status ?? ""),
+    seller: String(fields.seller ?? ""),
+  };
+}
+
 export const MILESTONE_LABELS: Record<number, string> = {
   1: "Auction won",
   2: "Inspection confirmed",
