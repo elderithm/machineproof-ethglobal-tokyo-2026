@@ -13,7 +13,8 @@
     "sui:test": "cd sui && sui move test",
     "sui:build": "cd sui && sui move build",
     "sui:deploy": "tsx scripts/deploy.ts",
-    "sui:seed": "tsx scripts/seed.ts"
+    "sui:seed": "tsx scripts/seed.ts",
+    "sui:e2e": "tsx scripts/demo-e2e.ts"
   },
   "dependencies": {
     "@mysten/dapp-kit": "1.1.17",

@@ -115,6 +115,26 @@ re-created each `npm run sui:seed` run (auctions have an end time).
 | AdminCap | [`0xff420aa0…7857e`](https://suiscan.xyz/testnet/object/0xff420aa0bfd06a0187de83f741e84083e31ccc3cada7569ac4ef3d6db187857e) |
 | Auction (latest seed) | [`0xc054d931…d00571`](https://suiscan.xyz/testnet/object/0xc054d931a539f1c6dfdf859a2bf36cb0c2258ed741b73e86261f8962f6d00571) |
 
+### On-chain end-to-end run (evidence)
+
+A full auction lifecycle executed on Sui testnet by `npm run sui:e2e`
+(World-independent: the admin key performs the World-gated registration step, and
+bidders are funded from the deployer). Every step is a real transaction:
+
+| Step | Transaction |
+| --- | --- |
+| Fund two bidders | [`2HbxHQD4…`](https://suiscan.xyz/testnet/tx/2HbxHQD4uJZRB5pZtxLdB18E1FohvEAeZwx94xS6Pvaz) |
+| Create auction | [`54KzA5yS…`](https://suiscan.xyz/testnet/tx/54KzA5ySFtpqDMyaj78H7UsMfnfaLscg28pD6SLxn9xp) |
+| Register verified bidders | [`FerYMhPi…`](https://suiscan.xyz/testnet/tx/FerYMhPifqofTUqsy8B8JCWZb7rj7hb481PBZ1cSguyn) |
+| Bid A (0.02 SUI) | [`EphKhkmn…`](https://suiscan.xyz/testnet/tx/EphKhkmna4sahxkYpyi1bQGveYGGvSTv5ERtQzeTc1i3) |
+| Bid B outbids (0.04) → A refunded 0.02 | [`Cp42U3mV…`](https://suiscan.xyz/testnet/tx/Cp42U3mVLTPvGcw5xy32mym9Mc3TTEDmChKz117tVMAT) |
+| Close → PurchaseRight + Settlement | [`HPGtXdkp…`](https://suiscan.xyz/testnet/tx/HPGtXdkpwgrk9hmu1X36iD1T8oFJkqTz2SzoT4VpAh5f) |
+| Release settlement milestone | [`C1QG1pz5…`](https://suiscan.xyz/testnet/tx/C1QG1pz5PkN14qC6LxKkmTfzMF2sDb3mVfqTRWDX25dD) |
+
+Resulting objects:
+[Settlement `0x083854db…`](https://suiscan.xyz/testnet/object/0x083854db6303975e0396a5c056e26b298e9ba13883b3483a4c7ac790072f7b32) ·
+[PurchaseRight `0x0f9a29c7…`](https://suiscan.xyz/testnet/object/0x0f9a29c7094dfb88d5d925c26e66af41acf8df78ca510fec88b209f04440ab87).
+
 ## Local setup
 
 Prereqns: Node 20+, the [Sui CLI](https://docs.sui.io/references/cli), a Sui wallet
@@ -152,14 +172,20 @@ endpoint; the `environment` field distinguishes sandbox/staging/production.
 
 ```bash
 npm run sui:test     # 10 Move unit tests (auction + settlement invariants)
+npm test             # 14 server verification tests (signal binding, replay, env)
 npm run typecheck    # strict TS
 npm run build        # production build
+npm run sui:e2e      # optional: full on-chain lifecycle on testnet (real txs)
 ```
 
 Move tests cover: unverified-bidder rejection, minimum/increment enforcement,
 outbid refunds, no early close, no double finalize, reserve-not-met cancel+refund,
 `PurchaseRight` issuance, milestone release, duplicate-milestone rejection, and
 over-release protection.
+
+Server verification tests cover the load-bearing World checks: a proof for the
+wrong wallet or wrong auction is rejected (signal binding), replayed nullifiers
+are flagged, and environment mismatch fails closed.
 
 ## Prize tracks
 
