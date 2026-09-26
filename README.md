@@ -196,6 +196,29 @@ are flagged, and environment mismatch fails closed.
 - **Curvegrid — Best RWA Tokenization**: the machine passport links physical-asset
   identity/provenance to auction permissions, entitlement, and settlement state.
 
+## Curvegrid / MultiBaas — EVM provenance mirror (optional)
+
+An optional EVM-side mirror of the machine's provenance, indexed by MultiBaas —
+**not** a second auction. Bids, `PurchaseRight`, and settlement stay on Sui.
+
+- Contract: `evm/contracts/MachineRWARegistry.sol` (owner-gated; emits
+  `MachineRegistered` / `ProvenanceUpdated` / `InspectionAnchored`). 5 Hardhat
+  tests: `cd evm && npm test`.
+- Read layer: `lib/multibaas.ts` (`@curvegrid/multibaas-sdk`) + the EvmProvenance
+  panel (env-gated).
+
+Setup:
+1. `cd evm && npm install && npm test`
+2. Create a MultiBaas deployment; connect it to Sepolia.
+3. Set `SEPOLIA_RPC_URL` + `EVM_DEPLOYER_PRIVATE_KEY`, then
+   `npm run deploy:sepolia` (prints the address + `machineId`).
+4. Link the contract in MultiBaas (UI, or `hardhat-multibaas-plugin`) with address
+   alias `provenance_registry` and turn on **Sync Events**.
+5. Create a **DApp User API key**; add your app origin under MultiBaas CORS.
+6. Set `NEXT_PUBLIC_MULTIBAAS_DEPLOYMENT_URL`,
+   `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY`, and `NEXT_PUBLIC_EVM_MACHINE_ID` in
+   `.env.local`. Keep the admin key server-side only.
+
 ## Stretch — World ID for Agents (bounded bidding agent)
 
 A future-facing extension, not the primary demo: a World-verified human delegates
