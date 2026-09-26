@@ -12,10 +12,12 @@ import type { AuctionView } from "@/lib/sui/queries";
 import { Notice, TxLink } from "@/components/ui";
 
 export function BidForm({
+  auctionId,
   auction,
   verified,
   onBid,
 }: {
+  auctionId: string;
   auction: AuctionView;
   verified: boolean;
   onBid: () => void;
@@ -76,7 +78,7 @@ export function BidForm({
     }
     let tx;
     try {
-      tx = buildPlaceBidTx(mist);
+      tx = buildPlaceBidTx(auctionId, mist);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to build transaction.");
       return;

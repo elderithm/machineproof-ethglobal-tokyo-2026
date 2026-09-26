@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { AUCTION_ID, PACKAGE_ID, mistToSui } from "@/lib/config";
+import { PACKAGE_ID, mistToSui } from "@/lib/config";
 import {
   MILESTONE_LABELS,
   parseSettlement,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/sui/queries";
 import { Notice, ObjectLink, TxLink } from "@/components/ui";
 
-export function SettlementPanel() {
+export function SettlementPanel({ auctionId }: { auctionId: string }) {
   const [busyIndex, setBusyIndex] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [digest, setDigest] = useState("");
@@ -30,10 +30,10 @@ export function SettlementPanel() {
     const events = (wonQuery.data as { data?: unknown[] } | undefined)?.data ?? [];
     for (const ev of events) {
       const j = (ev as { parsedJson?: Record<string, unknown> }).parsedJson;
-      if (j && j.auction_id === AUCTION_ID) return String(j.settlement_id ?? "");
+      if (j && j.auction_id === auctionId) return String(j.settlement_id ?? "");
     }
     return "";
-  }, [wonQuery.data]);
+  }, [wonQuery.data, auctionId]);
 
   const settlementQuery = useSuiClientQuery(
     "getObject",

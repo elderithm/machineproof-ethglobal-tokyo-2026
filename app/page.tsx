@@ -1,7 +1,5 @@
 import { WalletBar } from "@/components/WalletBar";
-import { MachinePassport } from "@/components/MachinePassport";
-import { AuctionPanel } from "@/components/AuctionPanel";
-import { SettlementPanel } from "@/components/SettlementPanel";
+import { Marketplace } from "@/components/Marketplace";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { ConfigBanner } from "@/components/ConfigBanner";
 
@@ -23,13 +21,7 @@ export default function Home() {
 
       <div className="mt-6 space-y-6">
         <ConfigBanner />
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <MachinePassport />
-          <AuctionPanel />
-        </div>
-
-        <SettlementPanel />
+        <Marketplace />
         <ActivityTimeline />
       </div>
 

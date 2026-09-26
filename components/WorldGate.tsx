@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { IDKitRequestWidget, orbLegacy } from "@worldcoin/idkit";
 import {
-  AUCTION_ID,
   WORLD_ACTION,
   WORLD_APP_ID,
   WORLD_CONFIGURED,
@@ -23,10 +22,12 @@ type RpContext = {
 type Status = "idle" | "loading" | "open" | "verifying" | "verified" | "error";
 
 export function WorldGate({
+  auctionId,
   wallet,
   verified,
   onVerified,
 }: {
+  auctionId: string;
   wallet: string;
   verified: boolean;
   onVerified: (digest: string) => void;
@@ -37,7 +38,7 @@ export function WorldGate({
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [open, setOpen] = useState(false);
 
-  const signal = auctionSignal(AUCTION_ID, wallet);
+  const signal = auctionSignal(auctionId, wallet);
 
   // 1) Fetch a fresh, server-signed rp_context, then open the widget.
   async function begin() {
@@ -68,7 +69,7 @@ export function WorldGate({
       const res = await fetch("/api/world/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ result, auctionId: AUCTION_ID, wallet }),
+        body: JSON.stringify({ result, auctionId, wallet }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {

@@ -6,7 +6,7 @@ import {
   useSignAndExecuteTransaction,
   useSuiClientQuery,
 } from "@mysten/dapp-kit";
-import { AUCTION_ID, mistToSui, shorten } from "@/lib/config";
+import { mistToSui, shorten } from "@/lib/config";
 import { parseAuction, type AuctionView } from "@/lib/sui/queries";
 import { buildCloseAuctionTx } from "@/lib/sui/tx";
 import { WorldGate } from "@/components/WorldGate";
@@ -32,8 +32,10 @@ function formatCountdown(ms: number): string {
 }
 
 export function AuctionPanel({
+  auctionId,
   onWinner,
 }: {
+  auctionId: string;
   onWinner?: (winner: string) => void;
 }) {
   const account = useCurrentAccount();
@@ -46,8 +48,8 @@ export function AuctionPanel({
 
   const { data, refetch, isLoading, error } = useSuiClientQuery(
     "getObject",
-    { id: AUCTION_ID, options: { showContent: true } },
-    { enabled: Boolean(AUCTION_ID), refetchInterval: 5000 },
+    { id: auctionId, options: { showContent: true } },
+    { enabled: Boolean(auctionId), refetchInterval: 5000 },
   );
 
   const auction: AuctionView | null = useMemo(() => {
@@ -82,7 +84,7 @@ export function AuctionPanel({
     }
   }, [auction, onWinner]);
 
-  if (!AUCTION_ID) return null;
+  if (!auctionId) return null;
   if (isLoading) return <div className="card text-muted">Loading auction…</div>;
   if (error || !auction)
     return (
@@ -104,7 +106,7 @@ export function AuctionPanel({
     setCloseError("");
     let tx;
     try {
-      tx = buildCloseAuctionTx();
+      tx = buildCloseAuctionTx(auctionId);
     } catch (e) {
       setCloseError(e instanceof Error ? e.message : "Build failed.");
       return;
@@ -162,6 +164,7 @@ export function AuctionPanel({
       ) : auction.status === "OPEN" && !ended ? (
         <div className="space-y-4">
           <WorldGate
+            auctionId={auctionId}
             wallet={wallet}
             verified={isVerified}
             onVerified={() => {
@@ -169,7 +172,12 @@ export function AuctionPanel({
               refetch();
             }}
           />
-          <BidForm auction={auction} verified={isVerified} onBid={refetch} />
+          <BidForm
+            auctionId={auctionId}
+            auction={auction}
+            verified={isVerified}
+            onBid={refetch}
+          />
         </div>
       ) : null}
 
