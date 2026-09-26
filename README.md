@@ -196,6 +196,23 @@ are flagged, and environment mismatch fails closed.
 - **Curvegrid — Best RWA Tokenization**: the machine passport links physical-asset
   identity/provenance to auction permissions, entitlement, and settlement state.
 
+## Stretch — World ID for Agents (bounded bidding agent)
+
+A future-facing extension, not the primary demo: a World-verified human delegates
+a **narrow** policy to an agent — one auction, a max-bid ceiling, an expiry, and
+bid-only (never settlement). The agent places the minimum winning bid when
+outbid, but refuses to exceed the ceiling, bid after expiry, or act on any other
+auction (`scripts/agent-bid.ts`, policy enforced in-app).
+
+```bash
+AGENT_MAX_BID_SUI=1.5 AGENT_EXPIRY_MINUTES=30 npm run agent:bid
+# bring a registered AGENT_BIDDER_KEY, or AGENT_SELF_SETUP=1 for a self-contained demo
+```
+
+Live example: the agent autonomously placed a within-ceiling winning bid
+([`GiL6QgEP…`](https://suiscan.xyz/testnet/tx/GiL6QgEPMgauLapDZuRULLVpo8qhTscqRFXi8ksFGKpZ))
+and then held its lead. The primary human-auction flow is unchanged.
+
 ## Pre-existing MachineProof disclosure
 
 Before ETHGlobal Tokyo 2026, MachineProof existed as an early product/concept for

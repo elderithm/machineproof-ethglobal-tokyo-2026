@@ -14,7 +14,8 @@
     "sui:build": "cd sui && sui move build",
     "sui:deploy": "tsx scripts/deploy.ts",
     "sui:seed": "tsx scripts/seed.ts",
-    "sui:e2e": "tsx scripts/demo-e2e.ts"
+    "sui:e2e": "tsx scripts/demo-e2e.ts",
+    "agent:bid": "tsx scripts/agent-bid.ts"
   },
   "dependencies": {
     "@mysten/dapp-kit": "1.1.17",
