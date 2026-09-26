@@ -219,6 +219,21 @@ Setup:
    `NEXT_PUBLIC_MULTIBAAS_DAPP_USER_API_KEY`, and `NEXT_PUBLIC_EVM_MACHINE_ID` in
    `.env.local`. Keep the admin key server-side only.
 
+## Due-diligence assistant (optional Monid data)
+
+A "Before you bid" assistant reviews the machine passport for completeness. Our
+own LLM (Anthropic) does the reasoning; **Monid** is used for what it actually is
+— a runtime **tool router** that surfaces external data sources (market
+comparables, manufacturer/recall lookups) via `/v1/discover`. Monid does not
+analyze content, and our own output is never branded as Monid.
+
+- Works out of the box with a deterministic rule-based checklist (no keys).
+- Set `ANTHROPIC_API_KEY` for LLM analysis; set `MONID_API_KEY`
+  (from app.monid.ai/access/api-keys, funded wallet) to add external data.
+  Both are server-only.
+- Honest boundary: a data-completeness review, not a physical inspection or title
+  check — Monid supplies data, our LLM reasons.
+
 ## Stretch — World ID for Agents (bounded bidding agent)
 
 A future-facing extension, not the primary demo: a World-verified human delegates
