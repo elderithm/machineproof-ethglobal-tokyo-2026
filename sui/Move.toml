@@ -1,0 +1,13 @@
+[package]
+name = "machineproof_sui"
+edition = "2024"
+license = "Apache-2.0"
+
+# The Sui framework is provided as an implicit system dependency by the
+# Sui CLI (>= 1.80), so no explicit [dependencies] entry is required.
+
+[addresses]
+machineproof = "0x0"
+
+[dev-addresses]
+machineproof = "0x0"
