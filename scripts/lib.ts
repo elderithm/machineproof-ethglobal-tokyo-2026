@@ -7,8 +7,13 @@ import { decodeSuiPrivateKey } from "@mysten/sui/cryptography";
 import { fromBase64 } from "@mysten/sui/utils";
 import { getFaucetHost, requestSuiFromFaucetV2 } from "@mysten/sui/faucet";
 
-/** Minimal .env loader: .env.local overrides .env; does not clobber real env. */
+/**
+ * Minimal .env loader (dotenv precedence): a real environment variable always
+ * wins, so a CLI override like `AUCTION_DURATION_MINUTES=180 npm run sui:seed`
+ * is respected. Among files, .env.local overrides .env.
+ */
 export function loadEnv() {
+  const fromRealEnv = new Set(Object.keys(process.env));
   for (const file of [".env", ".env.local"]) {
     const path = resolve(process.cwd(), file);
     if (!existsSync(path)) continue;
@@ -25,7 +30,8 @@ export function loadEnv() {
       ) {
         val = val.slice(1, -1);
       }
-      if (val.length > 0) process.env[key] = val; // .env.local (loaded 2nd) wins
+      // Never clobber a real environment variable; .env.local may override .env.
+      if (val.length > 0 && !fromRealEnv.has(key)) process.env[key] = val;
     }
   }
 }
