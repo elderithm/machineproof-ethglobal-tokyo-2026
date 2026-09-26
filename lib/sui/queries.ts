@@ -25,6 +25,8 @@ export type AuctionView = {
   highestBid: bigint;
   highestBidder: string | null;
   finalized: boolean;
+  /** Object id of the on-chain verified-bidder Table (for membership reads). */
+  verifiedTableId: string;
 };
 
 export type MilestoneView = {
@@ -86,9 +88,17 @@ function balanceValue(v: unknown): bigint {
   return 0n;
 }
 
+/** Extract the object id of a Table/Bag field (`{ fields: { id: { id } } }`). */
+function tableId(v: unknown): string {
+  const o = v as Fields | undefined;
+  const idField = (o?.fields as Fields | undefined)?.id as Fields | undefined;
+  return String(idField?.id ?? "");
+}
+
 export function parseAuction(fields: Fields): AuctionView {
   const statusCode = asNum(fields.status);
   return {
+    verifiedTableId: tableId(fields.verified),
     machineAssetId: String(fields.machine_asset_id ?? ""),
     seller: String(fields.seller ?? ""),
     reservePrice: asBig(fields.reserve_price),

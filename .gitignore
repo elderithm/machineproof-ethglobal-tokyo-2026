@@ -25,6 +25,9 @@ deployer.keystore
 deployments/*.json
 !deployments/.gitkeep
 
+# Server-side ephemeral state (nullifier replay store)
+.data/
+
 # Testing / coverage
 /coverage
 

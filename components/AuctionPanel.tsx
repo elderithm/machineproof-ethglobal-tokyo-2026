@@ -37,6 +37,7 @@ export function AuctionPanel({
   onWinner?: (winner: string) => void;
 }) {
   const account = useCurrentAccount();
+  const wallet = account?.address ?? "";
   const now = useNow();
   const [verified, setVerified] = useState(false);
   const [closeDigest, setCloseDigest] = useState("");
@@ -57,6 +58,23 @@ export function AuctionPanel({
     return parseAuction(content.fields);
   }, [data]);
 
+  // Read the connected wallet's membership in the on-chain verified registry, so
+  // the "verified" state survives a page reload (not just React state).
+  const membership = useSuiClientQuery(
+    "getDynamicFieldObject",
+    {
+      parentId: auction?.verifiedTableId ?? "",
+      name: { type: "address", value: wallet },
+    },
+    {
+      enabled: Boolean(auction?.verifiedTableId && wallet),
+      refetchInterval: 5000,
+    },
+  );
+  const isVerifiedOnChain = Boolean(
+    (membership.data as { data?: unknown } | undefined)?.data,
+  );
+
   // Reflect winner up to the settlement panel once closed.
   useEffect(() => {
     if (auction?.status === "CLOSED" && auction.highestBidder) {
@@ -75,10 +93,9 @@ export function AuctionPanel({
       </div>
     );
 
-  const wallet = account?.address ?? "";
   const isWinner =
     !!wallet && !!auction.highestBidder && wallet === auction.highestBidder;
-  const isVerified = verified || isWinner;
+  const isVerified = verified || isWinner || isVerifiedOnChain;
   const ended = now >= auction.endMs;
   const canClose =
     ended && !auction.finalized && auction.status === "OPEN";

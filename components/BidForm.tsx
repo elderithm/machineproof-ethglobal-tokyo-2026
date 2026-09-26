@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClientQuery,
+} from "@mysten/dapp-kit";
 import { buildPlaceBidTx } from "@/lib/sui/tx";
 import { mistToSui, suiToMist } from "@/lib/config";
 import type { AuctionView } from "@/lib/sui/queries";
@@ -17,8 +21,19 @@ export function BidForm({
   onBid: () => void;
 }) {
   const { mutate, isPending } = useSignAndExecuteTransaction();
+  const account = useCurrentAccount();
   const [error, setError] = useState("");
   const [digest, setDigest] = useState("");
+
+  const balanceQuery = useSuiClientQuery(
+    "getBalance",
+    { owner: account?.address ?? "" },
+    { enabled: Boolean(account), refetchInterval: 8000 },
+  );
+  const balanceMist = BigInt(
+    (balanceQuery.data as { totalBalance?: string } | undefined)?.totalBalance ??
+      "0",
+  );
 
   const minMist = useMemo(
     () =>
@@ -30,7 +45,20 @@ export function BidForm({
   const [amount, setAmount] = useState<string>(mistToSui(minMist).toString());
 
   const isOpen = auction.status === "OPEN";
-  const canBid = verified && isOpen;
+  // Leave a small gas buffer (0.02 SUI) beyond the bid amount.
+  const GAS_BUFFER = 20_000_000n;
+  const wantMist = (() => {
+    try {
+      return suiToMist(Number(amount || "0"));
+    } catch {
+      return 0n;
+    }
+  })();
+  const insufficient =
+    Boolean(account) &&
+    balanceMist > 0n &&
+    wantMist + GAS_BUFFER > balanceMist;
+  const canBid = verified && isOpen && !insufficient;
 
   function submit() {
     setError("");
@@ -103,6 +131,12 @@ export function BidForm({
       )}
       {verified && !isOpen && (
         <Notice tone="warn">Auction is {auction.status.toLowerCase()} — bidding is closed.</Notice>
+      )}
+      {verified && isOpen && insufficient && (
+        <Notice tone="warn">
+          Insufficient balance for this bid plus gas (you have{" "}
+          {mistToSui(balanceMist)} SUI). Lower the amount or fund your wallet.
+        </Notice>
       )}
       {error && <Notice tone="danger">{error}</Notice>}
       {digest && (
