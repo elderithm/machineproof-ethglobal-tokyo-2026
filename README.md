@@ -113,7 +113,7 @@ re-created each `npm run sui:seed` run (auctions have an end time).
 | Publish tx | [`FzVrvreG…WLKYA`](https://suiscan.xyz/testnet/tx/FzVrvreGBDka2xHGpj7eDDegjSQGv1sJLhM2fXfWLKYA) |
 | MachineAsset (MP-JP-0001) | [`0xe089b7fe…621f99`](https://suiscan.xyz/testnet/object/0xe089b7fe82ed21b525c8cc5da3ed4f3cd0eff8afad2499ce2715b48b22621f99) |
 | AdminCap | [`0xff420aa0…7857e`](https://suiscan.xyz/testnet/object/0xff420aa0bfd06a0187de83f741e84083e31ccc3cada7569ac4ef3d6db187857e) |
-| Auction (latest seed) | [`0xf19aa517…2db74`](https://suiscan.xyz/testnet/object/0xf19aa517a6d84c48967e84509e9dafc8669f23d03ee519fd2cc22ceb6cd2db74) |
+| Auction (latest seed) | [`0xc054d931…d00571`](https://suiscan.xyz/testnet/object/0xc054d931a539f1c6dfdf859a2bf36cb0c2258ed741b73e86261f8962f6d00571) |
 
 ## Local setup
 
