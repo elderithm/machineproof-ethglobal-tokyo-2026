@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
-import { hashSignal } from "@worldcoin/idkit-core/hashing";
 import { WORLD_ENVIRONMENT, WORLD_RP_ID } from "@/lib/config";
-import { auctionSignal, normalizeSuiAddress } from "@/lib/world/signal";
+import { normalizeSuiAddress } from "@/lib/world/signal";
+import {
+  environmentAllowed,
+  responsesBindWallet,
+} from "@/lib/world/verify-logic";
 import {
   consumeNullifier,
   getConsumption,
@@ -28,8 +31,6 @@ type Body = {
 function fail(error: string, status = 400) {
   return NextResponse.json({ ok: false, error }, { status });
 }
-
-const stripHash = (h: string) => h.replace(/^0x/i, "").toLowerCase();
 
 export async function POST(req: Request) {
   try {
@@ -61,17 +62,13 @@ export async function POST(req: Request) {
     // 2) Bind the proof to THIS auction + wallet: the signal it committed to must
     //    equal our reconstructed signal, so a proof for wallet A / auction X
     //    cannot be replayed for wallet B or auction Y.
-    const expected = stripHash(hashSignal(auctionSignal(auctionId, wallet)));
     const responses = Array.isArray(result.responses) ? result.responses : [];
-    const signalOk = responses.some(
-      (r) => r.signal_hash && stripHash(r.signal_hash) === expected,
-    );
-    if (!signalOk) {
+    if (!responsesBindWallet(responses, auctionId, wallet)) {
       return fail("Proof signal does not match this wallet and auction.", 400);
     }
 
     // 3) Environment must match what we requested.
-    if (data.environment && data.environment !== WORLD_ENVIRONMENT) {
+    if (!environmentAllowed(data.environment, WORLD_ENVIRONMENT)) {
       return fail(`Unexpected proof environment: ${data.environment}.`, 400);
     }
 

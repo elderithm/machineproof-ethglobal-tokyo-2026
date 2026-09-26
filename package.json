@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
     "sui:test": "cd sui && sui move test",
     "sui:build": "cd sui && sui move build",
     "sui:deploy": "tsx scripts/deploy.ts",
